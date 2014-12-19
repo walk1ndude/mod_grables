@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<install type="module" version="1.5.0">
+    <!-- Name of the Module -->
+	<name>Grables</name> 
+ 
+    <!-- Name of the Author -->
+	<author>loginov</author> 
+ 
+    <!-- Version Date of the Module -->
+	<creationDate>2014-12-15</creationDate> 
+ 
+    <!-- Module version number -->
+	<version>1.0.0</version> 
+ 
+    <!-- Description of what the module does -->
+	<description>Рисует "грабли"</description>
+ 
+    <!-- Listing of all files that should be installed for the module to function -->
+	<files>
+        <!-- The "module" attribute signifies that this is the main controller file -->
+		<filename module="mod_grables">mod_grables.php</filename>
+		<filename>index.html</filename>
+		<filename>tmpl/default.php</filename>
+		<filename>tmpl/index.html</filename>
+		<folder>js</folder>
+		<folder>pics</folder>
+	</files>
+ 
+	<params>
+		<param name="maxElementsInRow" type="text" default="14" label="Максимальное число видимых элементов" description="" />
+		<param name="grablesTime" type="calendar" default="1-12-2014" label="По состоянию на" description="" format="%d-%m-%Y" />
+        <param name="grablesJSON" type="textarea" default="" label="Структура граблей" description="" rows="50" cols="80" />
+    </params>
+</install>

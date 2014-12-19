@@ -24,6 +24,7 @@
 		<filename>tmpl/index.html</filename>
 		<folder>js</folder>
 		<folder>pics</folder>
+		<filename>grables_data.json</filename>
 	</files>
  
 	<params>

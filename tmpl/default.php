@@ -60,7 +60,7 @@ foreach ($worksheet->getRowIterator() as $row) {
 					
 					$curCellIndex = $currentCellIndex;
 					
-					$curCellIndex[count($curCellIndex) - 1] += 1;
+					$curCellIndex[$lastChildPos[i]] += 1;
 				
 					$currentLevel = implode(".", $curCellIndex);
 							
@@ -78,7 +78,7 @@ foreach ($worksheet->getRowIterator() as $row) {
 						$lastAdded = &$children[$lastChildPos[i]][$lastChildPos[j]];
 					}
 					else {
-						continue;
+						/*continue;
 						$nextCellIndex = $currentCellIndex;
 						$nextCellIndex[] = 1;
 						
@@ -132,11 +132,7 @@ foreach ($worksheet->getRowIterator() as $row) {
 							$lastAdded = &$lastChild[$lastChildPos];
 							*/	
 						}
-						
-						$children[$lastChildPos[i]][$lastChildPos[j]] = [];
-						
-						$lastAdded = &$children[$lastChildPos[i]][$lastChildPos[j]];
-					}
+	
 					break;
 					
 				case 1 :	

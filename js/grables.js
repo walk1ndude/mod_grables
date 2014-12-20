@@ -39,50 +39,61 @@ function wrap(text) {
 }
 
 function adjust() {
-	var rect;
-	
 	var prevTop = 0;
 	var prevBottom = 0;
 	var prevRight = 0;
 	
-	var top;
-	var bottom;
-	var left;
-	
-	var x;
-	var y;
+	var i = 0;
 	
 	var trCoordRegex = /translate\s*\((\d+\.?\d*)\s*(px)*,\s*(\d*\.?\d*)\s*(px)*/;
 	
-	$j.each(this[0], function(k, v) {
-		rect = v.getBoundingClientRect();
+	var elems = this[0];
+	
+	$j.each(elems, function(k, v) {
+		var rect = v.getBoundingClientRect();
 		
-		top = rect.top;
-		bottom = rect.bottom;
-		left = rect.left;
+		var top = rect.top;
+		var bottom = rect.bottom;
+		var left = rect.left;
+		
+		$j.each(elems.slice(0, i), function(k, v) {
+			var prevRect = v.getBoundingClientRect();
+			
+			if (prevRect.right > left) {
+				prevTop = Math.min(prevTop, prevRect.top);
+				prevBottom = Math.max(prevBottom, prevRect.bottom);
+			}
+		});
 		
 		// have intermission
-		if (top >= prevTop && prevBottom >= top && prevRight > left) {
+		if ((top >= prevTop && bottom <= prevBottom || top <= prevTop && bottom >= prevBottom) && prevRight > left) {
 			tr = $j(v).attr("transform");
 
-			x = parseFloat(tr.match(trCoordRegex)[1]);
-			y = parseFloat(tr.match(trCoordRegex)[3]);
+			var x = parseFloat(tr.match(trCoordRegex)[1]);
+			var y = parseFloat(tr.match(trCoordRegex)[3]);
 			
-			y += (prevBottom - top + 5);
+			var offset = prevBottom - top + 10; 
+			
+			if (y - offset >= 0 && offset >= rect.width) {
+				y -= offset;
+			}
+			else {
+				y += offset;
+			}
 			
 			$j(v).attr("transform", function () { return  "translate(" + x + ", " + y + ")"; });
 			
 			rect = v.getBoundingClientRect();
 			
-			//top = rect.top;
-			//bottom = rect.bottom;
-			//left = rect.left;
+			top = rect.top;
+			bottom = rect.bottom;
 		}
-		//console.log(x, y);
 		
 		prevTop = top;
 		prevBottom = bottom;
 		prevRight = rect.right;
+		
+		i++;
 	});
 }
 
@@ -268,7 +279,7 @@ function drawGrables(root, buttonStyle) {
 		.attr("class", "grables-cell-name")
 		.attr("overflow", "visible")
 		.attr("y", function (d) { 
-			var y = terminator + padding.front + Math.ceil(heightFront / 3) + ratioPaddingFront * padding.front + 25;
+			var y = terminator + padding.front + Math.ceil(heightFront / 3) + ratioPaddingFront * padding.front + 15;
 			return y + "px";
 		})
 		.attr("width", function (d) { return thickness.front + "px"; })

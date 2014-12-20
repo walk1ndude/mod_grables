@@ -319,5 +319,5 @@ $j(document).ready(function($) {
 	
 	maxElementsInRow = parseFloat(params.maxElementsInRow);
 	
-	drawGrables(JSON.parse(params.sections), "none");	
+	drawGrables(params.sections, "none");	
 });

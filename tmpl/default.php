@@ -17,21 +17,32 @@ $worksheet = $objPHPExcel->getActiveSheet();
 
 $columnWithValue = -1;	
 
-$grables = [];
-$grablesCell;
+$currentCellIndex = [
+	0 => 0
+];
 
-$currentCell = [1];
+$children[0] = [];
+
+$lastChildPos = [
+	"i" => 0,
+	"j" => -1
+];
+
+$prevChildPos = [
+	"i" => -1,
+	"j" => -1	
+];
+
+echo $lastChildPos, EOL;
+
 
 foreach ($worksheet->getRowIterator() as $row) {
 	$cellIterator = $row->getCellIterator();
 	$cellIterator->setIterateOnlyExistingCells(true);
 	
 	$i = 0;
-	$cellVal;
 	
-	$grablesCell = [];
-	$newCell = [];
-	$cellToAdd = false;
+	$gotNewCell = false;
 	
 	foreach ($cellIterator as $cell) {
 		if (!is_null($cell)) {
@@ -43,23 +54,103 @@ foreach ($worksheet->getRowIterator() as $row) {
 			
 			switch ($i) {
 				case 0 :
-					if ($cellVal === implode(".", $currentCell)) {
-						$cellToAdd = true;
-						$currentCell[count($currentCell) - 1] += 1; 
+					if ($cellVal === "") {
+						continue;
+					}
+					
+					$curCellIndex = $currentCellIndex;
+					
+					$curCellIndex[count($curCellIndex) - 1] += 1;
+				
+					$currentLevel = implode(".", $curCellIndex);
+							
+					if ($cellVal === $currentLevel) {					
+						// Если значение яичейки отличается от последнего числа текущего индекса на 1,
+						// просто добавить в последний уровень дочерних элементов
+						$gotNewCell = true;
+						
+						$currentCellIndex[$lastChildPos[i]] += 1; 
+						
+						$lastChildPos[j] += 1;
+						
+						$children[$lastChildPos[i]][$lastChildPos[j]] = [];
+						
+						$lastAdded = &$children[$lastChildPos[i]][$lastChildPos[j]];
+					}
+					else {
+						continue;
+						$nextCellIndex = $currentCellIndex;
+						$nextCellIndex[] = 1;
+						
+						$nextLevel = implode(".", $nextCellIndex);
+						
+						if ($cellVal === $nextLevel) {
+							// Если начинается новый подуровень
+							$currentCellIndex[] = 1;
+							
+							$lastChildPos[i] += 1;
+							
+							$prevChildPos[i] += 1;
+							$prevChildPos[j] = $lastChildPos[j];
+							
+							$lastChildPos[j] = 0;
+						}
+						else {
+							// Если произошел выход из подуровней, собрать дочерние элементы
+							/*
+							
+							$nextCellIndex = implode(".", $currentCellIndex);
+							
+							do {
+								$before = $nextCellIndex;
+								
+								$nextCellIndex = preg_replace("/\.\d+$/", "", implode(".", $currentCellIndex));
+								
+								echo $nextCellIndex, " ", $before, EOL;
+								
+								array_pop($currentCellIndex);
+								
+								$prevChildPos = count($children) - 2;
+								$prevChildPosPos = count($children[$prevChildPos]) - 1;
+								
+								$children[$prevChildPos][$prevChildPosPos]["children"] = array_pop($children);
+								
+							// Продолжать пока не достигли самого верхнего уровня или
+							// не установили соотвествие
+							
+							} while ($before === $nextCellIndex);
+							
+							$gotNewCell = true;
+						
+							$currentCellIndex[count($currentCellIndex) - 1] += 1; 
+							
+							$lastChild = &$children[count($children) - 1];	
+							$lastChildCount = max(count($lastChild) - 1, 0);
+							
+							$lastChild[$lastChildCount] = [];
+							
+							$lastAdded = &$lastChild[$lastChildPos];
+							*/	
+						}
+						
+						$children[$lastChildPos[i]][$lastChildPos[j]] = [];
+						
+						$lastAdded = &$children[$lastChildPos[i]][$lastChildPos[j]];
 					}
 					break;
 					
 				case 1 :	
-					if ($cellToAdd) {
-						$newCell["name"] = $cellVal;
-						$newCell["level"] = "1";
-						$newCell["children"] = [];
+					// Заполняем последний добавленный в иерархию объект значениями из полей
+					if ($gotNewCell) { 				
+						$lastAdded["name"] = $cellVal;
+						$lastAdded["level"] = "1";
+						$lastAdded["children"] = [];
 					}
 					break;
 					
 				case $columnWithValue : 
-					if ($cellToAdd) {
-						$newCell["value"] = floatval($cellVal); 
+					if ($gotNewCell) {
+						$lastAdded["value"] = floatval($cellVal); 
 					}
 					break;
 			}
@@ -67,24 +158,12 @@ foreach ($worksheet->getRowIterator() as $row) {
 		
 		$i += 1;
 	}
-	
-	if ($cellToAdd) {
-		$grables[] = $newCell;
-	}
 }
 
-echo print_r($grables);
-
-function escapeJsonString($value) {
-    # list from www.json.org: (\b backspace, \f formfeed)    
-    $escapers =     array("\\",  "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");
-    $replacements = array("", "", '"', "", "", "",  "",  "");
-    $result = str_replace($escapers, $replacements, $value);
-    return $result;
-};
+echo print_r($children[0]);
 
 $paramsToJS = array(
-	"sections" => escapeJsonString($params->get("grablesJSON", '{}')),
+	"sections" => $children[0],
 	"maxElementsInRow" => $params->get("maxElementsInRow", "14"),
 	"grablesTime" => str_replace("-", ".", $params->get("grablesTime", "01-12-2014"))
 );

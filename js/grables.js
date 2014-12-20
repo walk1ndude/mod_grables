@@ -24,8 +24,6 @@ function wrap(text) {
             line.push(word);
             tspan.text(line.join(" "));
 
-            //console.log(tspan.node().getComputedTextLength(), width, text.text());
-
             if (tspan.node().getComputedTextLength() > width && line.length > 1) {
                 line.pop();
                 tspan.text(line.join(" "));
@@ -38,6 +36,54 @@ function wrap(text) {
             }
         }
     });
+}
+
+function adjust() {
+	var rect;
+	
+	var prevTop = 0;
+	var prevBottom = 0;
+	var prevRight = 0;
+	
+	var top;
+	var bottom;
+	var left;
+	
+	var x;
+	var y;
+	
+	var trCoordRegex = /translate\s*\((\d+\.?\d*)\s*(px)*,\s*(\d*\.?\d*)\s*(px)*/;
+	
+	$j.each(this[0], function(k, v) {
+		rect = v.getBoundingClientRect();
+		
+		top = rect.top;
+		bottom = rect.bottom;
+		left = rect.left;
+		
+		// have intermission
+		if (top >= prevTop && prevBottom >= top && prevRight > left) {
+			tr = $j(v).attr("transform");
+
+			x = parseFloat(tr.match(trCoordRegex)[1]);
+			y = parseFloat(tr.match(trCoordRegex)[3]);
+			
+			y += (prevBottom - top + 5);
+			
+			$j(v).attr("transform", function () { return  "translate(" + x + ", " + y + ")"; });
+			
+			rect = v.getBoundingClientRect();
+			
+			//top = rect.top;
+			//bottom = rect.bottom;
+			//left = rect.left;
+		}
+		//console.log(x, y);
+		
+		prevTop = top;
+		prevBottom = bottom;
+		prevRight = rect.right;
+	});
 }
 
 var __history = [];
@@ -214,14 +260,16 @@ function drawGrables(root, buttonStyle) {
 			.attr("width", function (d) { return (thickness.front - 2 * ratioPaddingFront * padding.front) + "px"; })
 			.attr("height", function (d) { return heightFront + "px"; })
 			.attr("preserveAspectRatio", "xMidYMid meet");
-		
+	
+	var prevBottom;
+	var prevRight;	
 		  
 	cell.append("svg:svg")
 		.attr("class", "grables-cell-name")
 		.attr("overflow", "visible")
 		.attr("y", function (d) { 
-			var y = terminator + padding.front + heightFront / 3;
-			return (y + 25 * d.level + ratioPaddingFront * padding.front) + "px";
+			var y = terminator + padding.front + Math.ceil(heightFront / 3) + ratioPaddingFront * padding.front + 25;
+			return y + "px";
 		})
 		.attr("width", function (d) { return thickness.front + "px"; })
 		.attr("height", function (d) { return textNameHeight * 10 + "px"; })
@@ -236,6 +284,7 @@ function drawGrables(root, buttonStyle) {
 			.text(function (d) { return d.name; })
 			.call(wrap)
 			.attr("transform", function (d) { return "translate(" + (thickness.front / 2) + ", 0)"; })
+			.call(adjust);
 			
 		
 	cell.append("svg:path")

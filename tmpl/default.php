@@ -140,27 +140,6 @@ foreach ($worksheet->getRowIterator() as $row) {
 					// Заполняем последний добавленный в иерархию элемент значениями из полей
 					if ($gotNewCell) { 				
 						$lastAdded["name"] = $cellVal;
-						
-						// проверяем предыдущий элемент того же уровня иерархии на длину названия
-						// по данному критерию определяется в дальнем расположения названия
-						if ($lastChildPos[j] > 0) {
-							$len = count($children[$lastChildPos[i]][$lastChildPos[j] - 1]);
-							
-							if ($len > 100) {
-								$level = "3";
-							}
-							else if ($len > 50) {
-								$level = "2";
-							}
-							else {
-								$level = "1";
-							}
-						}
-						else {
-							$level = "1";
-						}
-						
-						$lastAdded["level"] = $level;
 						$lastAdded["children"] = [];
 					}
 					break;

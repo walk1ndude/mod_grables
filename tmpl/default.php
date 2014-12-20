@@ -33,9 +33,6 @@ $prevChildPos = [
 	"j" => -1	
 ];
 
-echo $lastChildPos, EOL;
-
-
 foreach ($worksheet->getRowIterator() as $row) {
 	$cellIterator = $row->getCellIterator();
 	$cellIterator->setIterateOnlyExistingCells(true);
@@ -54,7 +51,8 @@ foreach ($worksheet->getRowIterator() as $row) {
 			
 			switch ($i) {
 				case 0 :
-					if ($cellVal === "") {
+					// Если в яичейке не значение формата число.число. ... .число - не рассматривать столбец вообще					
+					if (!preg_match("/^\d+(\.\d+)*$/m", $cellVal)) {
 						continue;
 					}
 					
@@ -78,13 +76,12 @@ foreach ($worksheet->getRowIterator() as $row) {
 						$lastAdded = &$children[$lastChildPos[i]][$lastChildPos[j]];
 					}
 					else {
-						/*continue;
 						$nextCellIndex = $currentCellIndex;
 						$nextCellIndex[] = 1;
 						
-						$nextLevel = implode(".", $nextCellIndex);
+						$implCurCellIndex = implode(".", $nextCellIndex);
 						
-						if ($cellVal === $nextLevel) {
+						if ($cellVal === $implCurCellIndex) {
 							// Если начинается новый подуровень
 							$currentCellIndex[] = 1;
 							
@@ -94,57 +91,82 @@ foreach ($worksheet->getRowIterator() as $row) {
 							$prevChildPos[j] = $lastChildPos[j];
 							
 							$lastChildPos[j] = 0;
+							
+							$children[$lastChildPos[i]][$lastChildPos[j]] = [];
+						
+							$lastAdded = &$children[$lastChildPos[i]][$lastChildPos[j]];
 						}
 						else {
-							// Если произошел выход из подуровней, собрать дочерние элементы
-							/*
+							// Если произошел выход из подуровней, выполнить свертку дочерних элементов
 							
 							$nextCellIndex = implode(".", $currentCellIndex);
 							
 							do {
-								$before = $nextCellIndex;
-								
-								$nextCellIndex = preg_replace("/\.\d+$/", "", implode(".", $currentCellIndex));
-								
-								echo $nextCellIndex, " ", $before, EOL;
+								$nextCellIndex = preg_replace("/\.\d+$/", "", $nextCellIndex);
 								
 								array_pop($currentCellIndex);
+									
+								$children[$prevChildPos[i]][$prevChildPos[j]]["children"] = array_pop($children);
 								
-								$prevChildPos = count($children) - 2;
-								$prevChildPosPos = count($children[$prevChildPos]) - 1;
+								$lastChildPos = $prevChildPos;
 								
-								$children[$prevChildPos][$prevChildPosPos]["children"] = array_pop($children);
+								$prevChildPos[i] = $prevChildPos[i] - 1;
+								$prevChildPos[j] = $prevChildPos[i] > -1 ? count($children[$prevChildPos[i]]) - 1 : -1;
+								
+								$curCellIndex = $currentCellIndex;
+								$curCellIndex[$lastChildPos[i]] += 1;
+								
+								$implCurCellIndex = implode(".", $curCellIndex); 
 								
 							// Продолжать пока не достигли самого верхнего уровня или
 							// не установили соотвествие
+							} while ($cellVal !== $implCurCellIndex && $lastChildPos[i] > 0);
 							
-							} while ($before === $nextCellIndex);
-							
-							$gotNewCell = true;
-						
-							$currentCellIndex[count($currentCellIndex) - 1] += 1; 
-							
-							$lastChild = &$children[count($children) - 1];	
-							$lastChildCount = max(count($lastChild) - 1, 0);
-							
-							$lastChild[$lastChildCount] = [];
-							
-							$lastAdded = &$lastChild[$lastChildPos];
-							*/	
+							$lastChildPos[j] += 1;
+							$currentCellIndex[$lastChildPos[i]] += 1;
 						}
+							
+						if ($cellVal === $implCurCellIndex) {
+							$gotNewCell = true;
+							
+							$children[$lastChildPos[i]][$lastChildPos[j]] = [];
+							$lastAdded = &$children[$lastChildPos[i]][$lastChildPos[j]];
+						}
+					}
 	
 					break;
 					
 				case 1 :	
-					// Заполняем последний добавленный в иерархию объект значениями из полей
+					// Заполняем последний добавленный в иерархию элемент значениями из полей
 					if ($gotNewCell) { 				
 						$lastAdded["name"] = $cellVal;
-						$lastAdded["level"] = "1";
+						
+						// проверяем предыдущий элемент того же уровня иерархии на длину названия
+						// по данному критерию определяется в дальнем расположения названия
+						if ($lastChildPos[j] > 0) {
+							$len = count($children[$lastChildPos[i]][$lastChildPos[j] - 1]);
+							
+							if ($len > 100) {
+								$level = "3";
+							}
+							else if ($len > 50) {
+								$level = "2";
+							}
+							else {
+								$level = "1";
+							}
+						}
+						else {
+							$level = "1";
+						}
+						
+						$lastAdded["level"] = $level;
 						$lastAdded["children"] = [];
 					}
 					break;
 					
 				case $columnWithValue : 
+					// Заполняем последний добавленный в иерархию элемент значение показателя
 					if ($gotNewCell) {
 						$lastAdded["value"] = floatval($cellVal); 
 					}
@@ -156,7 +178,21 @@ foreach ($worksheet->getRowIterator() as $row) {
 	}
 }
 
-echo print_r($children[0]);
+// Выполнить свертку для последних элементов
+$nextCellIndex = implode(".", $currentCellIndex);
+
+do {
+	$nextCellIndex = preg_replace("/\.\d+$/", "", $nextCellIndex);
+	
+	array_pop($currentCellIndex);
+		
+	$children[$prevChildPos[i]][$prevChildPos[j]]["children"] = array_pop($children);
+	
+	$lastChildPos = $prevChildPos;
+	
+	$prevChildPos[i] = $prevChildPos[i] - 1;
+	$prevChildPos[j] = $prevChildPos[i] > -1 ? count($children[$prevChildPos[i]]) - 1 : -1;
+} while ($lastChildPos[i] > 0);
 
 $paramsToJS = array(
 	"sections" => $children[0],

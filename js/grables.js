@@ -59,6 +59,8 @@ function adjust() {
 	self.translated = [];
 	
 	var trCoordRegex = /translate\s*\((\d+\.?\d*)\s*(px)*,\s*(\d*\.?\d*)\s*(px)*/;
+	// for IE
+	var trCoordRegexAlternative = /translate\s*\((\d+\.?\d*)\s*(px)*/;
 	
 	var elems = this[0];
 	
@@ -80,8 +82,17 @@ function adjust() {
 		
 		tr = $j(v).attr("transform");
 
-		var x = parseFloat(tr.match(trCoordRegex)[1]);
-		var y = parseFloat(tr.match(trCoordRegex)[3]);
+		var matchArray = tr.match(trCoordRegex);
+		
+		if (matchArray) {
+			var x = parseFloat(matchArray[1]);
+			var y = parseFloat(matchArray[3]);
+		}
+		else {
+			matchArray = tr.match(trCoordRegexAlternative);
+			var x = parseFloat(matchArray[1]);
+			var y = 0.0;
+		}
 		
 		// have intermission
 		if ((prevTop >= top && prevTop <= bottom || top >= prevTop && top <= prevBottom) && prevRight >= left) {	

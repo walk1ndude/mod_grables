@@ -16,6 +16,7 @@ $objPHPExcel = PHPExcel_IOFactory::load("modules/mod_grables/test.xlsx");
 $worksheet = $objPHPExcel->getActiveSheet();
 
 $columnWithValue = -1;	
+$columnWithPics = -1;
 
 $currentCellIndex = [
 	0 => 0
@@ -47,6 +48,10 @@ foreach ($worksheet->getRowIterator() as $row) {
 			
 			if ($columnWithValue < 0 && $cellVal === "Исполнено бюджет субъекта РФ") {
 				$columnWithValue = $i;
+			}
+			
+			if ($columnWithPics < 0 && !strcasecmp($cellVal, "ПИКТОГРАММЫ")) {
+				$columnWithPics = $i;
 			}
 			
 			switch ($i) {
@@ -151,6 +156,13 @@ foreach ($worksheet->getRowIterator() as $row) {
 					if ($gotNewCell) {
 						$lastAdded["value"] = floatval($cellVal); 
 						$lastAdded["_value"] = $lastAdded["value"];
+					}
+					break;
+					
+				case $columnWithPics :
+					// Заполняем имя пиктограммы
+					if ($gotNewCell) {
+						$lastAdded["pic"] = $cellVal;
 					}
 					break;
 			}

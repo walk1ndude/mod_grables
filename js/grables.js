@@ -137,7 +137,7 @@ function drawGrables(root, buttonStyle) {
 		"bottom" : 40
 	};
 	
-	var gW = window.innerWidth / 2; //$j("#grables").parent().width();
+	var gW = window.innerWidth / 1.9; //$j("#grables").parent().width();
 	var gH = 600;
 	
 	$j("#grables").attr("width", function () { return gW + "px"; });
@@ -290,7 +290,7 @@ function drawGrables(root, buttonStyle) {
 	
 	
 	cellFront.append("svg:image")
-			.attr("xlink:href", function (d) { return "modules/mod_grables/pics/" + d.img; })
+			.attr("xlink:href", function (d) { return "modules/mod_grables/pics/" + d.pic; })
 			.attr("x", function (d) { return ratioPaddingFront * padding.front; })
 			.attr("width", function (d) { return (thickness.front - 2 * ratioPaddingFront * padding.front) + "px"; })
 			.attr("height", function (d) { return heightFront + "px"; })

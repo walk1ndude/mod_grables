@@ -32,6 +32,6 @@
 	<params>
 		<param name="maxElementsInRow" type="text" default="14" label="Максимальное число видимых элементов" description="" />
 		<param name="grablesTime" type="calendar" default="1-12-2014" label="По состоянию на" description="" format="%d-%m-%Y" />
-        <param name="grablesJSON" type="textarea" default="" label="Структура граблей" description="" rows="50" cols="80" />
+		<param name="filePath" type="text" default="" label="Маршрут к Excel-файлу, задающему структуру" description="" rows="1" cols="100"/>
     </params>
 </install>

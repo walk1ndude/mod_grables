@@ -137,7 +137,7 @@ function drawGrables(root, buttonStyle) {
 		"bottom" : 40
 	};
 	
-	var gW = window.innerWidth / 1.9; //$j("#grables").parent().width();
+	var gW = window.innerWidth / 2; //$j("#grables").parent().width();
 	var gH = 600;
 	
 	$j("#grables").attr("width", function () { return gW + "px"; });
@@ -154,7 +154,7 @@ function drawGrables(root, buttonStyle) {
 	var grablesFull = d3.select("#grables")
 					.append("svg:svg")
 					.attr("class", "grables")
-					.attr("overflow", "scroll")
+					.attr("overflow", "visible")
 					.attr("width", function (d) { return gW + "px"; })
 					.attr("height", gH + "px");
 					
@@ -308,7 +308,7 @@ function drawGrables(root, buttonStyle) {
 		.attr("class", "grables-cell-name")
 		.attr("overflow", "visible")
 		.attr("y", function (d) { 
-			var y = terminator + padding.front + Math.ceil(heightFront / 3) + ratioPaddingFront * padding.front + 25;
+			var y = terminator + padding.front + heightFront + ratioPaddingFront * padding.front;
 			return y + "px";
 		})
 		.attr("width", function (d) { return thickness.front + "px"; })

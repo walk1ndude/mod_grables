@@ -10,7 +10,7 @@ define('EOL',(PHP_SAPI == 'cli') ? PHP_EOL : '<br />');
 
 require_once('modules/mod_grables/Classes/PHPExcel/IOFactory.php');
 
-$objPHPExcel = PHPExcel_IOFactory::load("modules/mod_grables/test.xlsx");
+$objPHPExcel = PHPExcel_IOFactory::load($params->get("filePath", "modules/mod_grables/test.xlsx"));
 
 // все данные в первом листе
 $worksheet = $objPHPExcel->getActiveSheet();

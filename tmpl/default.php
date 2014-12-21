@@ -202,5 +202,5 @@ var params = <?php echo json_encode($paramsToJS); ?>;
 <div id="grablesTime">
 </div>
 
-<div id="grables">			
+<div id="grables" style='display:inline-block'>			
 </div>

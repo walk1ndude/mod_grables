@@ -64,12 +64,18 @@ function adjust() {
 	
 	var elems = this[0];
 	
+	var originalTop;
+	
 	$j.each(elems, function(k, v) {
 		var rect = v.getBoundingClientRect();
 		
 		var top = rect.top;
 		var bottom = rect.bottom;
 		var left = rect.left;
+		
+		if (!originalTop) {
+			originalTop = top;
+		}
 		
 		$j.each(elems.slice(0, k), function(k, v) {
 			var prevRect = v.getBoundingClientRect();
@@ -114,6 +120,9 @@ function adjust() {
 			bottom = rect.bottom;
 		}
 		
+		console.log(bottom + " ");
+		self.maxTextBottom = Math.max(self.maxTextBottom, bottom - originalTop);
+		
 		self.translated.push({
 			"x" : x,
 			"y" : y 
@@ -134,10 +143,10 @@ function drawGrables(root, buttonStyle) {
 	
 	root = toNewUnits(root);
 	
-	var translated = [];
 	var self = this;
 	
-	self.translated = translated;
+	self.translated = [];
+	self.maxTextBottom = 0;
 	
 	root = root.slice(0, maxElementsInRow);
 	
@@ -278,20 +287,21 @@ function drawGrables(root, buttonStyle) {
 		.attr("y", function (d) { return terminator; })
 		.attr("class", "grables-cell-front");
 		
+	var cellTop = padding.front;
+	var cellBottom = cellTop + heightFront - ratioPaddingFront * padding.front;
+	var cellTip = cellBottom + heightFront / 8;
+	var cellWidth = thickness.innerFront;
+			
+	var cellLeft = ratioPaddingFront * padding.front;
+	var cellRight = cellLeft + cellWidth;
+		
 	cellFront.append("svg:path")
-		.attr("d", function (d) {
-			var cellTop = padding.front;
-			var cellBottom = cellTop + heightFront - ratioPaddingFront * padding.front;
-			var cellWidth = thickness.innerFront;
-			
-			var cellLeft = ratioPaddingFront * padding.front;
-			var cellRight = cellLeft + cellWidth;
-			
+		.attr("d", function (d) {		
 			return "M" + cellLeft + " " + cellTop +
 				   " L " + cellRight + " " + cellTop +
 				   " L " + cellRight + " " + cellBottom +
 				   " L " + (cellLeft + 5 * cellWidth / 8) + " " + cellBottom +
-				   " L " + (cellLeft + cellWidth / 2) + " " + (cellBottom + heightFront / 8) +
+				   " L " + (cellLeft + cellWidth / 2) + " " + cellTip +
 				   " L " + (cellLeft + 3 * cellWidth / 8) + " " + cellBottom +
 				   " L " + cellLeft + " " + cellBottom +
 				   "Z";
@@ -313,17 +323,15 @@ function drawGrables(root, buttonStyle) {
 		.attr("stroke-width", "2px")
 		.attr("opacity", "0.1")
 		.style("stroke", function (d) { return color(d.name); });
-		
+			
+	var textOriginalTop = terminator + cellTip + padding.front;;
 		  
 	cell.append("svg:svg")
 		.attr("class", "grables-cell-name")
 		.attr("overflow", "visible")
-		.attr("y", function (d) { 
-			var y = terminator + padding.front + heightFront + ratioPaddingFront * padding.front;
-			return y + "px";
-		})
+		.attr("y", function (d) { return textOriginalTop + "px"; })
 		.attr("width", function (d) { return thickness.front + "px"; })
-		.attr("height", function (d) { return textNameHeight * 10 + "px"; })
+		.attr("height", function (d) { return textNameHeight + "px"; })
 		.append("svg:text")
 			.attr("class", "grables-cell-name-text")
 			.attr("y", 10)
@@ -354,7 +362,10 @@ function drawGrables(root, buttonStyle) {
 			
 			return "M" + xC + " " + yC + " L " + xC + " " + yCT;
 		});
-		
+	
+	console.log(self.maxTextBottom + "px", textOriginalTop + "px");
+	
+	$j(".grables").attr("height", (textOriginalTop + self.maxTextBottom + textNameHeight * 2 + margins.bottom) + "px");
 		  
 	$j(".grables-cell").hover(
 		function() {

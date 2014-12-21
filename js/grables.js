@@ -43,6 +43,8 @@ function adjust() {
 	var prevBottom = 0;
 	var prevRight = 0;
 	
+	self.translated = [];
+	
 	var i = 0;
 	
 	var trCoordRegex = /translate\s*\((\d+\.?\d*)\s*(px)*,\s*(\d*\.?\d*)\s*(px)*/;
@@ -65,14 +67,15 @@ function adjust() {
 			}
 		});
 		
-		// have intermission
-		if ((top >= prevTop && bottom <= prevBottom || top <= prevTop && bottom >= prevBottom) && prevRight > left) {
-			tr = $j(v).attr("transform");
+		tr = $j(v).attr("transform");
 
-			var x = parseFloat(tr.match(trCoordRegex)[1]);
-			var y = parseFloat(tr.match(trCoordRegex)[3]);
-			
+		var x = parseFloat(tr.match(trCoordRegex)[1]);
+		var y = parseFloat(tr.match(trCoordRegex)[3]);
+		// (top >= prevTop && bottom <= prevBottom || top <= prevTop && bottom >= prevBottom)
+		// have intermission
+		if ((prevTop >= top && prevTop <= bottom || top >= prevTop && top <= prevBottom) && prevRight >= left) {	
 			var offset = prevBottom - top + 10; 
+			
 			
 			if (y - offset >= 0 && offset >= rect.width) {
 				y -= offset;
@@ -89,6 +92,11 @@ function adjust() {
 			bottom = rect.bottom;
 		}
 		
+		self.translated.push({
+			"x" : x,
+			"y" : y 
+		});
+		
 		prevTop = top;
 		prevBottom = bottom;
 		prevRight = rect.right;
@@ -104,6 +112,11 @@ function drawGrables(root, buttonStyle) {
 		return;
 	}
 	
+	var translated = [];
+	var self = this;
+	
+	self.translated = translated;
+	
 	root = root.slice(0, maxElementsInRow);
 	
 	var margins = {
@@ -113,7 +126,7 @@ function drawGrables(root, buttonStyle) {
 		"bottom" : 40
 	};
 	
-	var gW = $j("#grables").parent().width();
+	var gW = window.innerWidth / 2; //$j("#grables").parent().width();
 	var gH = 600;
 	
 	$j("#grables").attr("width", function () { return gW + "px"; });
@@ -271,15 +284,20 @@ function drawGrables(root, buttonStyle) {
 			.attr("width", function (d) { return (thickness.front - 2 * ratioPaddingFront * padding.front) + "px"; })
 			.attr("height", function (d) { return heightFront + "px"; })
 			.attr("preserveAspectRatio", "xMidYMid meet");
-	
-	var prevBottom;
-	var prevRight;	
+		
+			
+	var lineToName = cell.append("svg:path")
+		.attr("class", "grables-line-to-name")
+		.attr("stroke-width", "2px")
+		.attr("opacity", "0.1")
+		.style("stroke", function (d) { return color(d.name); });
+		
 		  
 	cell.append("svg:svg")
 		.attr("class", "grables-cell-name")
 		.attr("overflow", "visible")
 		.attr("y", function (d) { 
-			var y = terminator + padding.front + Math.ceil(heightFront / 3) + ratioPaddingFront * padding.front + 15;
+			var y = terminator + padding.front + Math.ceil(heightFront / 3) + ratioPaddingFront * padding.front + 25;
 			return y + "px";
 		})
 		.attr("width", function (d) { return thickness.front + "px"; })
@@ -296,22 +314,25 @@ function drawGrables(root, buttonStyle) {
 			.call(wrap)
 			.attr("transform", function (d) { return "translate(" + (thickness.front / 2) + ", 0)"; })
 			.call(adjust);
-			
 		
-	cell.append("svg:path")
-		.attr("class", "grables-line-to-name")
-		.attr("stroke-width", "2px")
-		.attr("d", function (d) {
+	i = 0;	
+		
+	lineToName.attr("d", function (d) {
 			var xC = Math.ceil(thickness.front / 2);
-			var yC = terminator + heightFront / 3 + 4 * ratioPaddingFront * padding.front;
+			var yC = terminator + heightFront / 3 + (self.translated[i].y ? 4 : 2) * ratioPaddingFront * padding.front;
 			
 			var cellText = $j(this).siblings(".grables-cell-name")[0];
-			var yCT = d.level === "1" ? yC : $j(cellText).attr("y");
+			var cellFront = $j(this).siblings(".grables-cell-front")[0];
+			
+			var cellTextRect = cellText.getBoundingClientRect();
+			var cellFrontRect = cellFront.getBoundingClientRect(); 
+			var yCT = yC + self.translated[i].y ;
+			
+			i++;
 			
 			return "M" + xC + " " + yC + " L " + xC + " " + yCT;
-		})
-		.style("stroke", function (d) { return color(d.name); });
-
+		});
+		
 		  
 	$j(".grables-cell").hover(
 		function() {
@@ -327,6 +348,8 @@ function drawGrables(root, buttonStyle) {
 		function() {
 			$j(this).children(":not(.grables-cell-value, .grables-cell-name)").css("opacity", "1.0");
 			$j(this).children(".grables-cell-name").children(".grables-cell-name-rect").css("opacity", "0.3");
+			
+			$j(this).children(".grables-line-to-name").css("opacity", "0.1");
 			
 			$j($j(this).children(".grables-cell-value").children()).each(function (k, v) {
 					$j(v).css("font-size", "16px");

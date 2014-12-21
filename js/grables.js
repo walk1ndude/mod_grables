@@ -2,6 +2,19 @@ $j = jQuery.noConflict();
 
 var maxElementsInRow;
 
+var accuracy = 2;
+var order = 6;
+
+function toNewUnits(root) {
+	var acc = Math.pow(10, accuracy);
+		
+	$j.each(root, function(k, v) {
+		v.value = Math.round(v._value / Math.pow(10, order) * acc) / acc;
+	});
+	
+	return root;
+}
+
 function wrap(text) {
     text.each(function () {
         var text = d3.select(this),
@@ -45,8 +58,6 @@ function adjust() {
 	
 	self.translated = [];
 	
-	var i = 0;
-	
 	var trCoordRegex = /translate\s*\((\d+\.?\d*)\s*(px)*,\s*(\d*\.?\d*)\s*(px)*/;
 	
 	var elems = this[0];
@@ -58,10 +69,10 @@ function adjust() {
 		var bottom = rect.bottom;
 		var left = rect.left;
 		
-		$j.each(elems.slice(0, i), function(k, v) {
+		$j.each(elems.slice(0, k), function(k, v) {
 			var prevRect = v.getBoundingClientRect();
 			
-			if (prevRect.right > left) {
+			if (prevRect.right >= left) {
 				prevTop = Math.min(prevTop, prevRect.top);
 				prevBottom = Math.max(prevBottom, prevRect.bottom);
 			}
@@ -71,11 +82,11 @@ function adjust() {
 
 		var x = parseFloat(tr.match(trCoordRegex)[1]);
 		var y = parseFloat(tr.match(trCoordRegex)[3]);
-		// (top >= prevTop && bottom <= prevBottom || top <= prevTop && bottom >= prevBottom)
+		
 		// have intermission
 		if ((prevTop >= top && prevTop <= bottom || top >= prevTop && top <= prevBottom) && prevRight >= left) {	
-			var offset = prevBottom - top + 10; 
-			
+			var fontOffset = $j(v).attr("font-size");
+			var offset = prevBottom - top + 0.6 * (fontOffset ? parseFloat(fontOffset) : 5); 
 			
 			if (y - offset >= 0 && offset >= rect.width) {
 				y -= offset;
@@ -100,8 +111,6 @@ function adjust() {
 		prevTop = top;
 		prevBottom = bottom;
 		prevRight = rect.right;
-		
-		i++;
 	});
 }
 
@@ -111,6 +120,8 @@ function drawGrables(root, buttonStyle) {
 	if (!root.length) {
 		return;
 	}
+	
+	root = toNewUnits(root);
 	
 	var translated = [];
 	var self = this;
@@ -249,7 +260,7 @@ function drawGrables(root, buttonStyle) {
 		 	.attr("font-size", "16px")
 		 	.text(function (d) { return d.value; })
 		 	.call(wrap)
-			.attr("transform", function (d) { return "translate(" + padding.back + ", 0)"; });
+			.attr("transform", function (d) { return "translate(" + padding.back * ratioPaddingFront + ", 0)"; });
 		 	
 		 			  
 	var cellFront = cell.append("svg:svg")

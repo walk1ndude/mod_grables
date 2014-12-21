@@ -146,8 +146,11 @@ foreach ($worksheet->getRowIterator() as $row) {
 					
 				case $columnWithValue : 
 					// Заполняем последний добавленный в иерархию элемент значение показателя
+					// _value для хранения оригинального результата, value - для отображения перерассчитанного
+					// в новые единицы счисления
 					if ($gotNewCell) {
 						$lastAdded["value"] = floatval($cellVal); 
+						$lastAdded["_value"] = $lastAdded["value"];
 					}
 					break;
 			}

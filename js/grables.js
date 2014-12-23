@@ -227,17 +227,13 @@ function drawGrables(root, buttonStyle) {
 						.attr("x", margins.left)
 						.attr("y", margins.top);
 						
-		var grablesFullRect = grables.append("svg:rect")
-					.attr("width", gW + "px")
-					.attr("height", gH + "px")
-					.style("fill", "url(#gradient)");
 
 						
     grablesFull.append("svg:image")
     	.attr("class", "back-key")
         .attr("xlink:href", "modules/mod_grables/pics/back.svg")
         .attr("width", margins.left + "px")
-        .attr("height", "px")
+        .attr("height", margins.top + "px")
         .attr("preserveAspectRatio", "xMidYMid meet")
         .style("display", buttonStyle);
 	

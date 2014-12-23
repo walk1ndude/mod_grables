@@ -175,7 +175,7 @@ function drawGrables(root, buttonStyle) {
 	var actGH = gH - margins.top - margins.bottom;
 	
 	var color = d3.scale.category10();
-	var color100 = d3.scale.category20();
+	var color100 = d3.scale.category20c();
 	
 	
 	var grablesFull = d3.select("#grables")
@@ -288,8 +288,10 @@ function drawGrables(root, buttonStyle) {
 		.attr("width", function (d) { return thickness.innerBack + "px"; })
 		.attr("height", function (d) { return (maxBackHeight * d.value / maxValue) + "px"; })
 		.attr("transform", function (d) { return "translate(" + ratioPaddingBack * padding.back + "," + textValueHeight + ")"; })
-		.style("stroke", function (d) { return color(d.name); })
-		.style("fill", function (d) { return color(d.name); });
+		.style("stroke", "none")
+		.style("fill", function(d, i) {
+			return "url(#gradient" + i + ")";
+		});
 		
 		
 	cell.append("svg:svg")
@@ -348,7 +350,9 @@ function drawGrables(root, buttonStyle) {
 		.attr("class", "grables-line-to-name")
 		.attr("stroke-width", "2px")
 		.attr("opacity", "0.1")
-		.style("stroke", function (d) { return color(d.name); });
+		.style("stroke", function(d, i) {
+			return "url(#gradient" + i + ")";
+		});
 			
 	var textOriginalTop = terminator + cellTip + padding.front;;
 		  

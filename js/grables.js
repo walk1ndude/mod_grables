@@ -174,8 +174,25 @@ function drawGrables(root, buttonStyle) {
 	var actGW = gW - margins.left - margins.right;
 	var actGH = gH - margins.top - margins.bottom;
 	
-	var color = d3.scale.category10();
-	var color100 = d3.scale.category20c();
+	var colors = [
+		"#486b93",
+		"#6c0101",
+		"#9c5100",
+		"#307a13",
+		"#1b6871",
+		"#2a94d0",
+		"#4d1475",
+		"#d98000",
+		"#db0000",
+		"#160d6e",
+		"#669670",
+		"#824d9a",
+		"#3357a9",
+		"#727272"
+	]
+	
+	var color = d3.scale.category20();
+	var color100 = d3.scale.category20();
 	
 	
 	var grablesFull = d3.select("#grables")
@@ -289,9 +306,7 @@ function drawGrables(root, buttonStyle) {
 		.attr("height", function (d) { return (maxBackHeight * d.value / maxValue) + "px"; })
 		.attr("transform", function (d) { return "translate(" + ratioPaddingBack * padding.back + "," + textValueHeight + ")"; })
 		.style("stroke", "none")
-		.style("fill", function(d, i) {
-			return "url(#gradient" + i + ")";
-		});
+		.style("fill", function(d, i) { return colors[i]; });
 		
 		
 	cell.append("svg:svg")
@@ -333,10 +348,7 @@ function drawGrables(root, buttonStyle) {
 				   "Z";
 		})
 		.style("stroke", "none")
-		.style("fill", function(d, i) {
-			return "url(#gradient" + i + ")";
-		});
-	
+		.style("fill", function(d, i) { return colors[i]; });	
 	
 	cellFront.append("svg:image")
 			.attr("xlink:href", function (d) { return "modules/mod_grables/pics/" + d.pic; })
@@ -350,9 +362,7 @@ function drawGrables(root, buttonStyle) {
 		.attr("class", "grables-line-to-name")
 		.attr("stroke-width", "2px")
 		.attr("opacity", "0.1")
-		.style("stroke", function(d, i) {
-			return "url(#gradient" + i + ")";
-		});
+		.style("stroke", function(d, i) { return colors[i]; });
 			
 	var textOriginalTop = terminator + cellTip + padding.front;;
 		  

@@ -194,12 +194,10 @@ function drawGrables(root, buttonStyle) {
 						
 	var defs = grables.append("svg:defs");
 	
-	var i = 0;
-	
 	var gradient = defs.selectAll("radialGradient")
 		.data(root).enter()
 		.append("svg:radialGradient")
-			.attr("id", function (d) { return "gradient" + i++; })
+			.attr("id", function (d, i) { return "gradient" + i; })
 			.attr("gradientUnits", "userSpaceOnUse");
 			
 	gradient.append("svg:stop")
@@ -251,7 +249,6 @@ function drawGrables(root, buttonStyle) {
 	var terminator = 7 * actGH / 12;
 	
 	var xBack = leftBack;
-	var i = 0;
 	
 	var offset = Math.floor((widthBack - Math.min(root.length, maxElementsInRow) * thickness.back) / 2); 
 	
@@ -264,9 +261,8 @@ function drawGrables(root, buttonStyle) {
 		 .attr("overflow", "visible")
 		 .attr("width", function (d) { return thickness.back + "px"; })
 		 .attr("height", function (d) { return actGH + "px"; })
-		 .attr("transform", function (d) {
+		 .attr("transform", function (d, i) {
 			 var cellX = xBack + i * thickness.back + offset;
-			 i ++;
 			 return "translate(" + cellX + ", 0)";
 		 });
 
@@ -322,8 +318,6 @@ function drawGrables(root, buttonStyle) {
 			
 	var cellLeft = ratioPaddingFront * padding.front;
 	var cellRight = cellLeft + cellWidth;
-	
-	i = 0;
 		
 	cellFront.append("svg:path")
 		.attr("d", function (d) {		
@@ -337,8 +331,8 @@ function drawGrables(root, buttonStyle) {
 				   "Z";
 		})
 		.style("stroke", "none")
-		.style("fill", function(d) {
-			return "url(#gradient" + (i ++) + ")";
+		.style("fill", function(d, i) {
+			return "url(#gradient" + i + ")";
 		});
 	
 	
@@ -377,9 +371,7 @@ function drawGrables(root, buttonStyle) {
 			.attr("transform", function (d) { return "translate(" + (thickness.front / 2) + ", 0)"; })
 			.call(adjust);
 		
-	i = 0;	
-		
-	lineToName.attr("d", function (d) {
+	lineToName.attr("d", function (d, i) {
 			var xC = Math.ceil(thickness.front / 2);
 			var yC = terminator + heightFront / 3 + (self.translated[i].y ? 4 : 2) * ratioPaddingFront * padding.front;
 			
@@ -389,8 +381,6 @@ function drawGrables(root, buttonStyle) {
 			var cellTextRect = cellText.getBoundingClientRect();
 			var cellFrontRect = cellFront.getBoundingClientRect(); 
 			var yCT = yC + self.translated[i].y ;
-			
-			i++;
 			
 			return "M" + xC + " " + yC + " L " + xC + " " + yCT;
 		});

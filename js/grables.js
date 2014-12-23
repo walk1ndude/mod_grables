@@ -180,7 +180,7 @@ function drawGrables(root, buttonStyle) {
 		"bottom" : 40
 	};
 	
-	var gW = window.innerWidth / 2;//$j("#grables").parent().width();
+	var gW = $j("#grables").parent().width(); //window.innerWidth / 2;
 	var gH = 600;
 	
 	$j("#grables").attr("width", gW + "px");

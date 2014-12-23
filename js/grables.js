@@ -2,14 +2,21 @@ $j = jQuery.noConflict();
 
 var maxElementsInRow;
 
-var accuracy = 2;
 var order = 6;
 
 function toNewUnits(root) {
-	var acc = Math.pow(10, accuracy);
-		
 	$j.each(root, function(k, v) {
-		v.value = Math.round(v._value / Math.pow(10, order) * acc) / acc;
+		var curAcc = 1;
+	
+		do {
+			var divByOrderOfTen = Math.round(v._value / Math.pow(10, order) * Math.pow(10, curAcc));
+			var lastNumber = divByOrderOfTen % 10;
+			
+			curAcc ++;
+		} while (v._value !== 0.0 && lastNumber === 0);
+		
+
+		v.value = divByOrderOfTen / Math.pow(10, curAcc - 1);
 	});
 	
 	return root;
@@ -120,7 +127,6 @@ function adjust() {
 			bottom = rect.bottom;
 		}
 		
-		console.log(bottom + " ");
 		self.maxTextBottom = Math.max(self.maxTextBottom, bottom - originalTop);
 		
 		self.translated.push({
@@ -157,7 +163,7 @@ function drawGrables(root, buttonStyle) {
 		"bottom" : 40
 	};
 	
-	var gW = $j("#grables").parent().width();
+	var gW = window.innerWidth / 2;//$j("#grables").parent().width();
 	var gH = 600;
 	
 	$j("#grables").attr("width", function () { return gW + "px"; });
@@ -169,6 +175,7 @@ function drawGrables(root, buttonStyle) {
 	var actGH = gH - margins.top - margins.bottom;
 	
 	var color = d3.scale.category10();
+	var color100 = d3.scale.category20();
 	
 	
 	var grablesFull = d3.select("#grables")
@@ -184,6 +191,27 @@ function drawGrables(root, buttonStyle) {
 						.attr("height", function (d) { return actGH + "px"; })
 						.attr("x", function (d) { return margins.left; })
 						.attr("y", function (d) { return margins.top; });
+						
+	var defs = grables.append("svg:defs");
+	
+	var i = 0;
+	
+	var gradient = defs.selectAll("radialGradient")
+		.data(root).enter()
+		.append("svg:radialGradient")
+			.attr("id", function (d) { return "gradient" + i++; })
+			.attr("gradientUnits", "userSpaceOnUse");
+			
+	gradient.append("svg:stop")
+            	.attr("offset", "0%")
+				.attr("stop-color", function (d) { return color(d.name); })
+				.attr("stop-opacity", "0");
+				
+	gradient.append("svg:stop")
+            	.attr("offset", "100%")
+				.attr("stop-color", function (d) { return color100(d.name); })
+				.attr("stop-opacity", "1");
+				
 						
     grablesFull.append("svg:image")
     	.attr("class", "back-key")
@@ -294,6 +322,8 @@ function drawGrables(root, buttonStyle) {
 			
 	var cellLeft = ratioPaddingFront * padding.front;
 	var cellRight = cellLeft + cellWidth;
+	
+	i = 0;
 		
 	cellFront.append("svg:path")
 		.attr("d", function (d) {		
@@ -307,7 +337,9 @@ function drawGrables(root, buttonStyle) {
 				   "Z";
 		})
 		.style("stroke", "none")
-		.style("fill", function (d) { return color(d.name); })
+		.style("fill", function(d) {
+			return "url(#gradient" + (i ++) + ")";
+		});
 	
 	
 	cellFront.append("svg:image")
@@ -362,8 +394,6 @@ function drawGrables(root, buttonStyle) {
 			
 			return "M" + xC + " " + yC + " L " + xC + " " + yCT;
 		});
-	
-	console.log(self.maxTextBottom + "px", textOriginalTop + "px");
 	
 	$j(".grables").attr("height", (textOriginalTop + self.maxTextBottom + textNameHeight * 2 + margins.bottom) + "px");
 		  

@@ -196,16 +196,16 @@ function drawGrables(root, buttonStyle) {
 					.attr("class", "grables")
 					.attr("overflow", "visible")
 					.attr("width", gW + "px")
-					.attr("height", gH + "px")
+					.attr("height", gH + "px");
 					
-
-					
-	
 	var defs = grablesFull.append("svg:defs");
 		
-	var gradient = defs.selectAll("linearGradient")
-			.append("svg:linearGradient")
+	var gradient = defs.append("svg:linearGradient")
 			.attr("id", "gradient")
+			.attr("x1", "50%")
+		    .attr("y1", "0%")
+		    .attr("x2", "50%")
+		    .attr("y2", "100%")
 			.attr("gradientUnits", "userSpaceOnUse");
 			
 	gradient.append("svg:stop")
@@ -219,6 +219,12 @@ function drawGrables(root, buttonStyle) {
 	gradient.append("svg:stop")
             .attr("offset", "1")
 			.attr("stop-color", "#71818b");
+			
+	grablesFull.append("svg:rect")
+			   .attr("class", "gradient-rect")
+			   .attr("width", gW + "px")
+			   .attr("height", gH + "px")
+			   .style("fill", "url(#gradient)");
 				
 	var grables = grablesFull.append("svg:svg")
 						.attr("overflow", "visible")
@@ -227,7 +233,6 @@ function drawGrables(root, buttonStyle) {
 						.attr("x", margins.left)
 						.attr("y", margins.top);
 						
-
 						
     grablesFull.append("svg:image")
     	.attr("class", "back-key")
@@ -399,8 +404,11 @@ function drawGrables(root, buttonStyle) {
 			
 			return "M" + xC + " " + yC + " L " + xC + " " + yCT;
 		});
+		
+	var recalculatedHeight = textOriginalTop + self.maxTextBottom + textNameHeight * 2 + margins.bottom;
 	
-	$j(".grables").attr("height", (textOriginalTop + self.maxTextBottom + textNameHeight * 2 + margins.bottom) + "px");
+	$j(".grables").attr("height", recalculatedHeight + "px");
+	$j(".gradient-rect").attr("height", recalculatedHeight + "px");
 		  
 	$j(".grables-cell").hover(
 		function() {
